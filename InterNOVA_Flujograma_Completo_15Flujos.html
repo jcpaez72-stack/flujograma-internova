@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>InterNOVA · Flujograma Completo · Los 15 flujos · INTERLAB S.A.</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #F4F4F2; color: #111; }
+
+  /* ─── HEADER ─── */
+  .topbar {
+    background: linear-gradient(180deg, #0F6E56 0%, #085041 100%);
+    color: #fff;
+    padding: 24px 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .topbar-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .topbar-subtitle { font-size: 12px; color: #9FE1CB; margin-top: 4px; letter-spacing: 1px; }
+  .topbar-meta { font-size: 11px; color: #9FE1CB; text-align: right; }
+  .topbar-meta strong { color: #fff; display: block; font-size: 12px; margin-bottom: 2px; }
+
+  /* ─── LEYENDA ─── */
+  .legend-bar {
+    background: #fff;
+    border-bottom: 1px solid #E5E3DC;
+    padding: 14px 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+    font-size: 11px;
+    color: #5F5E5A;
+    position: sticky;
+    top: 86px;
+    z-index: 99;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 22px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .legend-swatch.process { background: #1D9E75; border: 1px solid #0F6E56; }
+  .legend-swatch.decision { width: 16px; height: 16px; background: #F4C430; transform: rotate(45deg); border: 1px solid #BA7517; border-radius: 2px; }
+  .legend-swatch.api { background: #B8B5AE; border: 1px solid #7E7B73; border-radius: 8px; }
+  .legend-swatch.escalate { background: #533AB7; border: 1px solid #3D2A92; }
+  .legend-swatch.endpoint { background: #5F5E5A; border: 1px solid #2F2E2A; border-radius: 50%; }
+  .legend-swatch.pending { background: #BA7517; border: 1px solid #7C4F0F; position: relative; }
+  .legend-swatch.pending::before { content:"!"; position:absolute; left:50%; top:-1px; transform:translateX(-50%); color:#fff; font-weight:700; font-size:11px; }
+
+  /* ─── CONTAINER ─── */
+  .canvas-wrapper {
+    padding: 30px 0 80px 0;
+    overflow-x: auto;
+  }
+  .canvas {
+    margin: 0 auto;
+    width: 1400px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    background: #0F6E56;
+    color: #fff;
+    padding: 22px 40px;
+    position: relative;
+  }
+  .section-header.f1 { background: linear-gradient(90deg, #0F6E56 0%, #1D9E75 100%); }
+  .section-header.f2 { background: linear-gradient(90deg, #185FA5 0%, #378ADD 100%); }
+  .section-header.f4 { background: linear-gradient(90deg, #533AB7 0%, #7B5CD9 100%); }
+  .section-header.entry { background: linear-gradient(90deg, #2F2E2A 0%, #5F5E5A 100%); }
+  .section-tag { font-size: 11px; letter-spacing: 2px; opacity: 0.75; }
+  .section-title { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .section-desc { font-size: 12px; opacity: 0.85; margin-top: 6px; max-width: 900px; line-height: 1.5; }
+
+  /* ─── SVG STYLES ─── */
+  svg.flow { display: block; width: 100%; height: auto; background: #FAFAF8; }
+
+  .node-rect { fill: #1D9E75; stroke: #0F6E56; stroke-width: 1.5; }
+  .node-rect-light { fill: #E1F5EE; stroke: #1D9E75; stroke-width: 1.5; }
+  .node-rect-info { fill: #F4F1E8; stroke: #BA7517; stroke-width: 1; }
+  .node-rect-escalate { fill: #533AB7; stroke: #3D2A92; stroke-width: 1.5; }
+  .node-rect-end { fill: #5F5E5A; stroke: #2F2E2A; stroke-width: 1.5; }
+  .node-rect-pending { fill: #BA7517; stroke: #7C4F0F; stroke-width: 1.5; }
+  .node-decision { fill: #F4C430; stroke: #BA7517; stroke-width: 1.5; }
+  .node-api { fill: #B8B5AE; stroke: #7E7B73; stroke-width: 1; }
+  .node-start { fill: #FFFFFF; stroke: #0F6E56; stroke-width: 2.5; }
+  .node-rect-f2 { fill: #185FA5; stroke: #0E4178; stroke-width: 1.5; }
+  .node-rect-f4 { fill: #533AB7; stroke: #3D2A92; stroke-width: 1.5; }
+
+  text.node-label { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #fff; text-anchor: middle; font-weight: 600; pointer-events: none; }
+  text.node-label-dark { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #111; text-anchor: middle; font-weight: 600; pointer-events: none; }
+  text.node-sublabel { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; fill: #fff; text-anchor: middle; opacity: 0.85; pointer-events: none; }
+  text.node-sublabel-dark { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 9.5px; fill: #5F5E5A; text-anchor: middle; pointer-events: none; }
+  text.code-tag { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 9.5px; fill: #5F5E5A; text-anchor: middle; font-weight: 700; pointer-events: none; }
+  text.api-label { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 10px; fill: #2F2E2A; text-anchor: middle; font-weight: 700; pointer-events: none; }
+  text.flow-label { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 10px; fill: #5F5E5A; font-style: italic; text-anchor: middle; pointer-events: none; }
+  text.pending-label { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 10px; fill: #fff; text-anchor: middle; font-weight: 700; pointer-events: none; }
+
+  line.connector, path.connector { stroke: #5F5E5A; stroke-width: 1.5; fill: none; }
+  line.connector-dashed { stroke: #BA7517; stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+
+  .pending-marker {
+    fill: #BA7517;
+    stroke: #7C4F0F;
+    stroke-width: 1.5;
+  }
+
+  .footer-bar {
+    background: #0F6E56;
+    color: #9FE1CB;
+    padding: 18px 40px;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 0;
+  }
+  .footer-bar strong { color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HEADER ════════════════ -->
+<div class="topbar">
+  <div class="topbar-row">
+    <div>
+      <div class="topbar-subtitle">INTERNATIONAL LABORATORIES SERVICES INTERLAB S.A.</div>
+      <div class="topbar-title">InterNOVA · Flujograma Completo · 15 flujos</div>
+    </div>
+    <div class="topbar-meta">
+      <strong>Arquitectura WDB · Powered by Jelou</strong>
+      Mayo 2026 · Versión 2.0 · Confidencial
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ LEYENDA ════════════════ -->
+<div class="legend-bar">
+  <div class="legend-item"><span class="legend-swatch process"></span>Proceso del agente</div>
+  <div class="legend-item"><span class="legend-swatch decision"></span>Decisión / NLU</div>
+  <div class="legend-item"><span class="legend-swatch api"></span>API · Servicio externo</div>
+  <div class="legend-item"><span class="legend-swatch escalate"></span>Escalado a asesor humano</div>
+  <div class="legend-item"><span class="legend-swatch endpoint"></span>Inicio / Cierre</div>
+  <div class="legend-item"><span class="legend-swatch pending"></span>PENDIENTE Interlab</div>
+</div>
+
+<!-- ════════════════ CANVAS ════════════════ -->
+<div class="canvas-wrapper">
+<div class="canvas">
+
+<!-- ─── SECCIÓN 0: ENTRADA COMÚN ─── -->
+<div class="section-header entry">
+  <div class="section-tag">SECCIÓN COMÚN</div>
+  <div class="section-title">Entrada del usuario · Apertura de sesión</div>
+  <div class="section-desc">Mensaje de bienvenida con consentimiento de Protección de Datos Personales (obligatorio por normativa). El NLU identifica la intención y deriva al flujo correspondiente.</div>
+</div>
+
+<svg class="flow" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet">
+  <!-- INICIO -->
+  <circle cx="700" cy="50" r="22" class="node-start"/>
+  <text x="700" y="55" class="node-label-dark" style="font-size:11px">INICIO</text>
+
+  <line x1="700" y1="72" x2="700" y2="105" class="connector" marker-end="url(#arrow)"/>
+
+  <!-- BIENVENIDA + PDP -->
+  <rect x="500" y="105" width="400" height="80" rx="6" class="node-rect"/>
+  <text x="700" y="135" class="node-label">Mensaje de bienvenida + PDP</text>
+  <text x="700" y="153" class="node-sublabel">Consentimiento expreso de Protección de Datos Personales</text>
+  <text x="700" y="170" class="node-sublabel">(obligatorio por normativa · Ley Orgánica de Protección de Datos)</text>
+
+  <line x1="700" y1="185" x2="700" y2="220" class="connector" marker-end="url(#arrow)"/>
+
+  <!-- DECISIÓN: ¿Aceptación PDP? -->
+  <polygon points="700,220 800,275 700,330 600,275" class="node-decision"/>
+  <text x="700" y="270" class="node-label-dark">¿Aceptación PDP?</text>
+  <text x="700" y="285" class="node-sublabel-dark">(primer mensaje de respuesta)</text>
+
+  <!-- NO PDP -->
+  <line x1="600" y1="275" x2="350" y2="275" class="connector"/>
+  <line x1="350" y1="275" x2="350" y2="320" class="connector" marker-end="url(#arrow)"/>
+  <text x="475" y="265" class="flow-label">NO</text>
+  <rect x="220" y="320" width="260" height="55" rx="6" class="node-rect-end"/>
+  <text x="350" y="345" class="node-label">Cierre sin atención</text>
+  <text x="350" y="362" class="node-sublabel">Sin consentimiento, no hay flujo</text>
+
+  <!-- SÍ PDP -->
+  <line x1="700" y1="330" x2="700" y2="370" class="connector" marker-end="url(#arrow)"/>
+  <text x="715" y="355" class="flow-label">SÍ</text>
+
+  <!-- IDENTIFICAR INTENCIÓN (NLU) -->
+  <polygon points="700,370 830,440 700,510 570,440" class="node-decision"/>
+  <text x="700" y="430" class="node-label-dark">NLU — Identificar intención</text>
+  <text x="700" y="447" class="node-sublabel-dark">¿Qué desea el usuario?</text>
+
+  <text x="700" y="555" class="flow-label" style="font-size:11px">→ Bifurca según intención detectada por NLU (ver flujos abajo) ←</text>
+
+  <!-- Marker definition -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#BA7517"/>
+    </marker>
+  </defs>
+</svg>
+
+
+<!-- ════════════════ FLUJO 1 - COTIZACIÓN ════════════════ -->
+<div class="section-header f1">
+  <div class="section-tag">FLUJO 1 · COTIZACIÓN DE EXÁMENES</div>
+  <div class="section-title">Prioridad PRIMERA en implementación</div>
+  <div class="section-desc">Mayor volumen, menor riesgo clínico. Dos pasos previos obligatorios: identificación de ciudad e identificación de tipo de cliente. Luego se bifurca en Rama Particular o Rama Convenio.</div>
+</div>
+
+<svg class="flow" viewBox="0 0 1400 1820" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrow1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <!-- PASO 0A: Identificar ciudad -->
+  <rect x="540" y="30" width="320" height="65" rx="6" class="node-rect"/>
+  <text x="700" y="58" class="node-label">PASO 0A · Identificar ciudad</text>
+  <text x="700" y="75" class="node-sublabel">8 ciudades: GYE, UIO, CUE, Portoviejo, Manta,</text>
+  <text x="700" y="88" class="node-sublabel">Machala, Milagro, Quevedo</text>
+  <text x="540" y="20" class="code-tag" text-anchor="start">F1.0A</text>
+
+  <line x1="700" y1="95" x2="700" y2="125" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- DECISIÓN: ¿Ciudad válida? -->
+  <polygon points="700,125 810,180 700,235 590,180" class="node-decision"/>
+  <text x="700" y="180" class="node-label-dark">¿Ciudad disponible?</text>
+
+  <!-- NO: ciudad fuera -->
+  <line x1="590" y1="180" x2="350" y2="180" class="connector"/>
+  <line x1="350" y1="180" x2="350" y2="225" class="connector" marker-end="url(#arrow1)"/>
+  <text x="470" y="170" class="flow-label">NO</text>
+  <rect x="200" y="225" width="300" height="60" rx="6" class="node-rect-info"/>
+  <text x="350" y="252" class="node-label-dark" style="font-size:11px">Informar ciudades disponibles</text>
+  <text x="350" y="270" class="node-sublabel-dark">+ ofrecer escalado a asesor</text>
+
+  <!-- SÍ: continuar -->
+  <line x1="700" y1="235" x2="700" y2="270" class="connector" marker-end="url(#arrow1)"/>
+  <text x="715" y="260" class="flow-label">SÍ</text>
+
+  <!-- PASO 0B: Identificar tipo de cliente -->
+  <rect x="540" y="270" width="320" height="65" rx="6" class="node-rect"/>
+  <text x="700" y="298" class="node-label">PASO 0B · Tipo de cliente</text>
+  <text x="700" y="315" class="node-sublabel">"¿A título personal o en nombre de</text>
+  <text x="700" y="328" class="node-sublabel">una empresa, clínica o laboratorio?"</text>
+  <text x="540" y="260" class="code-tag" text-anchor="start">F1.0B</text>
+
+  <line x1="700" y1="335" x2="700" y2="370" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- DECISIÓN: tipo de cliente -->
+  <polygon points="700,370 830,440 700,510 570,440" class="node-decision"/>
+  <text x="700" y="430" class="node-label-dark">Tipo de cliente</text>
+  <text x="700" y="448" class="node-sublabel-dark">Personal · Empresa · Convenio · Lab</text>
+
+  <!-- ── RAMA A — PARTICULAR (lado izquierdo) ── -->
+  <line x1="570" y1="440" x2="350" y2="440" class="connector"/>
+  <line x1="350" y1="440" x2="350" y2="495" class="connector" marker-end="url(#arrow1)"/>
+  <text x="465" y="430" class="flow-label">PARTICULAR</text>
+
+  <rect x="220" y="495" width="260" height="55" rx="6" class="node-rect-light"/>
+  <text x="350" y="520" class="node-label-dark" style="font-size:12px">RAMA A · Cliente Particular</text>
+  <text x="350" y="538" class="node-sublabel-dark">8 ciudades · Aplica a todas</text>
+
+  <line x1="350" y1="550" x2="350" y2="585" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- A-1: ¿Tiene seguro? -->
+  <rect x="220" y="585" width="260" height="55" rx="6" class="node-rect"/>
+  <text x="350" y="610" class="node-label">A-1 · Pregunta sobre seguro</text>
+  <text x="350" y="627" class="node-sublabel">"¿Cuenta con algún seguro médico privado?"</text>
+  <text x="220" y="575" class="code-tag" text-anchor="start">F1.A1</text>
+
+  <line x1="350" y1="640" x2="350" y2="670" class="connector" marker-end="url(#arrow1)"/>
+
+  <polygon points="350,670 460,725 350,780 240,725" class="node-decision"/>
+  <text x="350" y="725" class="node-label-dark">¿Tiene seguro?</text>
+
+  <!-- NO seguro: → A-3 cotizar particular -->
+  <line x1="240" y1="725" x2="120" y2="725" class="connector"/>
+  <line x1="120" y1="725" x2="120" y2="800" class="connector" marker-end="url(#arrow1)"/>
+  <text x="180" y="715" class="flow-label">NO</text>
+
+  <rect x="20" y="800" width="200" height="60" rx="6" class="node-rect"/>
+  <text x="120" y="828" class="node-label">A-3 · Solicitar exámenes</text>
+  <text x="120" y="845" class="node-sublabel">Texto · Foto · PDF · Audio</text>
+  <text x="20" y="790" class="code-tag" text-anchor="start">F1.A3</text>
+
+  <line x1="120" y1="860" x2="120" y2="895" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- API: OCR / Transcripción -->
+  <ellipse cx="120" cy="910" rx="90" ry="14" class="node-api"/>
+  <rect x="30" y="910" width="180" height="34" class="node-api"/>
+  <ellipse cx="120" cy="944" rx="90" ry="14" class="node-api"/>
+  <text x="120" y="932" class="api-label">API · OCR / Transcripción</text>
+
+  <line x1="120" y1="958" x2="120" y2="990" class="connector" marker-end="url(#arrow1)"/>
+
+  <rect x="20" y="990" width="200" height="60" rx="6" class="node-rect"/>
+  <text x="120" y="1018" class="node-label">Cotizar tarifa particular</text>
+  <text x="120" y="1035" class="node-sublabel">Según ciudad confirmada</text>
+
+  <line x1="120" y1="1050" x2="120" y2="1085" class="connector" marker-end="url(#arrow1)"/>
+
+  <rect x="20" y="1085" width="200" height="70" rx="6" class="node-rect-light"/>
+  <text x="120" y="1110" class="node-label-dark" style="font-size:11px">Entregar cotización</text>
+  <text x="120" y="1128" class="node-sublabel-dark">Precio + condiciones + tiempo</text>
+  <text x="120" y="1142" class="node-sublabel-dark">+ sedes + código COT-2026-XXXX</text>
+
+  <line x1="120" y1="1155" x2="120" y2="1195" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- SÍ seguro: → A-2a mostrar 4 aseguradoras -->
+  <line x1="350" y1="780" x2="350" y2="820" class="connector" marker-end="url(#arrow1)"/>
+  <text x="365" y="805" class="flow-label">SÍ</text>
+
+  <rect x="220" y="820" width="260" height="80" rx="6" class="node-rect"/>
+  <text x="350" y="848" class="node-label">A-2a · Mostrar aseguradoras</text>
+  <text x="350" y="866" class="node-sublabel">SALUD · MEDEC · BMI · IMED</text>
+  <text x="350" y="880" class="node-sublabel">+ campo abierto: "otra aseguradora"</text>
+  <text x="220" y="810" class="code-tag" text-anchor="start">F1.A2a</text>
+
+  <line x1="350" y1="900" x2="350" y2="935" class="connector" marker-end="url(#arrow1)"/>
+
+  <polygon points="350,935 480,1005 350,1075 220,1005" class="node-decision"/>
+  <text x="350" y="1000" class="node-label-dark" style="font-size:11.5px">¿Aseguradora con</text>
+  <text x="350" y="1015" class="node-label-dark" style="font-size:11.5px">convenio en INTERLAB?</text>
+
+  <!-- NO convenio → cotizar particular -->
+  <line x1="220" y1="1005" x2="160" y2="1005" class="connector"/>
+  <line x1="160" y1="1005" x2="160" y2="1195" class="connector" marker-end="url(#arrow1)"/>
+  <text x="190" y="995" class="flow-label">NO</text>
+
+  <!-- SÍ convenio → A-2b solicitar cédula -->
+  <line x1="350" y1="1075" x2="350" y2="1110" class="connector" marker-end="url(#arrow1)"/>
+  <text x="365" y="1095" class="flow-label">SÍ</text>
+
+  <rect x="220" y="1110" width="260" height="55" rx="6" class="node-rect"/>
+  <text x="350" y="1135" class="node-label">A-2b · Solicitar cédula del paciente</text>
+  <text x="350" y="1152" class="node-sublabel">Validar formato: 10 dígitos numéricos</text>
+  <text x="220" y="1100" class="code-tag" text-anchor="start">F1.A2b</text>
+
+  <line x1="350" y1="1165" x2="350" y2="1195" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- ESCALAR ASESOR (común para A2b y A3) -->
+  <rect x="60" y="1195" width="540" height="65" rx="6" class="node-rect-escalate"/>
+  <text x="330" y="1222" class="node-label" style="font-size:13px">ESCALAR A ASESOR · Rama Particular</text>
+  <text x="330" y="1240" class="node-sublabel">Contexto completo: ciudad, aseguradora (si aplica), cédula, examen(es), cotización</text>
+  <text x="330" y="1253" class="node-sublabel">El asesor cierra la cotización con la tarifa del seguro o la entrega final</text>
+
+  <line x1="330" y1="1260" x2="330" y2="1295" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- A-CIERRE -->
+  <polygon points="330,1295 440,1350 330,1405 220,1350" class="node-decision"/>
+  <text x="330" y="1350" class="node-label-dark">¿Algo más?</text>
+
+  <line x1="220" y1="1350" x2="120" y2="1350" class="connector"/>
+  <line x1="120" y1="1350" x2="120" y2="1430" class="connector" marker-end="url(#arrow1)"/>
+  <text x="170" y="1340" class="flow-label">NO</text>
+
+  <rect x="20" y="1430" width="200" height="60" rx="6" class="node-rect-end"/>
+  <text x="120" y="1458" class="node-label">Cierre institucional</text>
+  <text x="120" y="1475" class="node-sublabel">Mensaje final + sedes + 24/7</text>
+
+  <line x1="440" y1="1350" x2="500" y2="1350" class="connector"/>
+  <line x1="500" y1="1350" x2="500" y2="1430" class="connector" marker-end="url(#arrow1)"/>
+  <text x="465" y="1340" class="flow-label">SÍ</text>
+
+  <rect x="400" y="1430" width="200" height="60" rx="6" class="node-rect-info"/>
+  <text x="500" y="1455" class="node-label-dark" style="font-size:11px">Re-NLU</text>
+  <text x="500" y="1472" class="node-sublabel-dark">Derivar a nuevo flujo</text>
+
+  <!-- ══════════════ RAMA B — CONVENIO / LAB ══════════════ -->
+  <line x1="830" y1="440" x2="1050" y2="440" class="connector"/>
+  <line x1="1050" y1="440" x2="1050" y2="495" class="connector" marker-end="url(#arrow1)"/>
+  <text x="935" y="430" class="flow-label">CONVENIO · LAB</text>
+
+  <rect x="920" y="495" width="260" height="55" rx="6" class="node-rect-light"/>
+  <text x="1050" y="520" class="node-label-dark" style="font-size:12px">RAMA B · Convenio / Laboratorio</text>
+  <text x="1050" y="538" class="node-sublabel-dark">Disponible solo en GYE, UIO y CUE</text>
+
+  <line x1="1050" y1="550" x2="1050" y2="585" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- DECISIÓN: ¿Ciudad GYE/UIO/CUE? -->
+  <polygon points="1050,585 1180,655 1050,725 920,655" class="node-decision"/>
+  <text x="1050" y="650" class="node-label-dark" style="font-size:11.5px">¿Ciudad es GYE,</text>
+  <text x="1050" y="665" class="node-label-dark" style="font-size:11.5px">UIO o CUE?</text>
+
+  <!-- NO: B-0 -->
+  <line x1="1180" y1="655" x2="1280" y2="655" class="connector"/>
+  <line x1="1280" y1="655" x2="1280" y2="730" class="connector" marker-end="url(#arrow1)"/>
+  <text x="1230" y="645" class="flow-label">NO</text>
+
+  <rect x="1180" y="730" width="200" height="100" rx="6" class="node-rect-info"/>
+  <text x="1280" y="755" class="node-label-dark" style="font-size:11px">B-0 · Ciudad sin convenio</text>
+  <text x="1280" y="772" class="node-sublabel-dark">Informar y compartir</text>
+  <text x="1280" y="785" class="node-sublabel-dark">teléfono + correo de filial</text>
+  <text x="1280" y="803" class="node-sublabel-dark">+ ofrecer cotización</text>
+  <text x="1280" y="816" class="node-sublabel-dark">como cliente particular</text>
+
+  <!-- PENDIENTE Interlab marcador -->
+  <rect x="1175" y="836" width="210" height="32" rx="4" class="node-rect-pending"/>
+  <circle cx="1192" cy="852" r="9" fill="#fff"/>
+  <text x="1192" y="856" class="api-label" style="fill:#BA7517">!</text>
+  <text x="1295" y="850" class="pending-label" style="font-size:9.5px">PENDIENTE INTERLAB</text>
+  <text x="1295" y="862" class="pending-label" style="font-size:9px">Contactos por ciudad</text>
+
+  <!-- SÍ: B-1 → -->
+  <line x1="1050" y1="725" x2="1050" y2="760" class="connector" marker-end="url(#arrow1)"/>
+  <text x="1065" y="745" class="flow-label">SÍ</text>
+
+  <rect x="920" y="760" width="260" height="65" rx="6" class="node-rect"/>
+  <text x="1050" y="788" class="node-label">B-1 · Solicitar identificación</text>
+  <text x="1050" y="805" class="node-sublabel">Número de convenio · Lab · RUC</text>
+  <text x="920" y="750" class="code-tag" text-anchor="start">F1.B1</text>
+
+  <line x1="1050" y1="825" x2="1050" y2="860" class="connector" marker-end="url(#arrow1)"/>
+
+  <polygon points="1050,860 1170,915 1050,970 930,915" class="node-decision"/>
+  <text x="1050" y="918" class="node-label-dark">¿Convenio activo?</text>
+
+  <!-- NO encontrado -->
+  <line x1="930" y1="915" x2="850" y2="915" class="connector"/>
+  <line x1="850" y1="915" x2="850" y2="1100" class="connector" marker-end="url(#arrow1)"/>
+  <text x="890" y="905" class="flow-label">NO</text>
+
+  <!-- SÍ convenio → B-2a -->
+  <line x1="1050" y1="970" x2="1050" y2="1005" class="connector" marker-end="url(#arrow1)"/>
+  <text x="1065" y="990" class="flow-label">SÍ</text>
+
+  <rect x="920" y="1005" width="260" height="65" rx="6" class="node-rect"/>
+  <text x="1050" y="1033" class="node-label">B-2a · Solicitar exámenes</text>
+  <text x="1050" y="1050" class="node-sublabel">Texto · Imagen · PDF · Audio</text>
+  <text x="920" y="995" class="code-tag" text-anchor="start">F1.B2a</text>
+
+  <line x1="1050" y1="1070" x2="1050" y2="1100" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- ESCALAR Convenio -->
+  <rect x="780" y="1100" width="540" height="65" rx="6" class="node-rect-escalate"/>
+  <text x="1050" y="1127" class="node-label" style="font-size:13px">ESCALAR A ASESOR · Rama Convenio</text>
+  <text x="1050" y="1145" class="node-sublabel">Contexto: ciudad, número de convenio/RUC, lista de exámenes</text>
+  <text x="1050" y="1158" class="node-sublabel">El asesor genera cotización con tarifa convenio + PDF formal</text>
+
+  <line x1="1050" y1="1165" x2="1050" y2="1200" class="connector" marker-end="url(#arrow1)"/>
+
+  <!-- B-CIERRE -->
+  <polygon points="1050,1200 1160,1255 1050,1310 940,1255" class="node-decision"/>
+  <text x="1050" y="1255" class="node-label-dark">¿Algo más?</text>
+
+  <line x1="940" y1="1255" x2="850" y2="1255" class="connector"/>
+  <line x1="850" y1="1255" x2="850" y2="1430" class="connector" marker-end="url(#arrow1)"/>
+  <text x="895" y="1245" class="flow-label">NO</text>
+
+  <rect x="750" y="1430" width="200" height="60" rx="6" class="node-rect-end"/>
+  <text x="850" y="1458" class="node-label">Cierre institucional</text>
+  <text x="850" y="1475" class="node-sublabel">Mensaje final + sedes + 24/7</text>
+
+  <line x1="1160" y1="1255" x2="1230" y2="1255" class="connector"/>
+  <line x1="1230" y1="1255" x2="1230" y2="1430" class="connector" marker-end="url(#arrow1)"/>
+  <text x="1190" y="1245" class="flow-label">SÍ</text>
+
+  <rect x="1130" y="1430" width="200" height="60" rx="6" class="node-rect-info"/>
+  <text x="1230" y="1455" class="node-label-dark" style="font-size:11px">Re-NLU</text>
+  <text x="1230" y="1472" class="node-sublabel-dark">Derivar a nuevo flujo</text>
+
+  <!-- Logica común: examen mencionado desde primer mensaje (C-1) -->
+  <line x1="700" y1="1545" x2="700" y2="1545" class="connector"/>
+
+  <rect x="380" y="1560" width="640" height="100" rx="6" class="node-rect-info"/>
+  <text x="700" y="1590" class="node-label-dark" style="font-size:13px">LÓGICA COMÚN · Contexto acumulado (C-1, C-2)</text>
+  <text x="700" y="1612" class="node-sublabel-dark" style="font-size:10.5px">Si el usuario menciona el examen desde el primer mensaje: el agente lo guarda en contexto durante todo</text>
+  <text x="700" y="1626" class="node-sublabel-dark" style="font-size:10.5px">el proceso de identificación. Una vez confirmados ciudad + tipo de cliente + tarifa: cotiza directamente</text>
+  <text x="700" y="1640" class="node-sublabel-dark" style="font-size:10.5px">sin volver a preguntar el examen. Aplica tanto a Rama A como a Rama B.</text>
+  <text x="380" y="1550" class="code-tag" text-anchor="start">F1.C1 · F1.C2</text>
+
+  <!-- Reglas globales aplicables F1 -->
+  <rect x="60" y="1700" width="1280" height="80" rx="6" fill="#FAEEDA" stroke="#FAC775" stroke-width="1"/>
+  <text x="700" y="1725" class="node-label-dark" style="font-size:13px; fill:#7C4F0F">Reglas globales que aplican durante todo F1</text>
+  <text x="700" y="1745" class="node-sublabel-dark" style="font-size:10.5px">Una pregunta a la vez · Sin repetición de datos ya proporcionados · Sin menús numerados · Confirmación natural</text>
+  <text x="700" y="1759" class="node-sublabel-dark" style="font-size:10.5px">Cambios en medio del flujo se ajustan sin reiniciar · Salida a humano en cualquier momento ('asesor', 'humano', 'ayuda')</text>
+  <text x="700" y="1772" class="node-sublabel-dark" style="font-size:10.5px">Timeout de sesión: 5 min sin respuesta → recordatorio · 10 min totales → cierre automático</text>
+
+</svg>
+
+
+<!-- ════════════════ FLUJO 2 - RESULTADOS ════════════════ -->
+<div class="section-header f2">
+  <div class="section-tag">FLUJO 2 · CONSULTA DE ESTADO DE RESULTADOS</div>
+  <div class="section-title">Fase Inicial — proceso 100% manual</div>
+  <div class="section-desc">El agente recopila la información del paciente y escala al asesor con todo el contexto. Los resultados nunca se entregan por WhatsApp por confidencialidad legal — se comparte el enlace de la página web de Interlab.</div>
+</div>
+
+<svg class="flow" viewBox="0 0 1400 1180" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <!-- PASO 0: ciudad + tipo cliente -->
+  <rect x="540" y="30" width="320" height="80" rx="6" class="node-rect-f2"/>
+  <text x="700" y="58" class="node-label">PASO 0 · Ciudad + Tipo de cliente</text>
+  <text x="700" y="76" class="node-sublabel">"¿En qué ciudad se realizó sus exámenes?"</text>
+  <text x="700" y="90" class="node-sublabel">"¿Consulta personal o de convenio/laboratorio?"</text>
+  <text x="700" y="104" class="node-sublabel" style="font-size:9px">Si ya hay contexto de F1: usar sin volver a preguntar</text>
+  <text x="540" y="20" class="code-tag" text-anchor="start">F2.0</text>
+
+  <line x1="700" y1="110" x2="700" y2="145" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- DECISIÓN: tipo cliente -->
+  <polygon points="700,145 830,215 700,285 570,215" class="node-decision"/>
+  <text x="700" y="210" class="node-label-dark">Tipo de cliente</text>
+  <text x="700" y="225" class="node-sublabel-dark">Particular · Convenio</text>
+
+  <!-- ── RUTA A — PARTICULAR ── -->
+  <line x1="570" y1="215" x2="350" y2="215" class="connector"/>
+  <line x1="350" y1="215" x2="350" y2="270" class="connector" marker-end="url(#arrow2)"/>
+  <text x="465" y="205" class="flow-label">PARTICULAR</text>
+
+  <rect x="220" y="270" width="260" height="60" rx="6" class="node-rect-light"/>
+  <text x="350" y="295" class="node-label-dark" style="font-size:12px; fill:#185FA5">RUTA A · Cliente Particular</text>
+  <text x="350" y="313" class="node-sublabel-dark">Aplica a las 8 ciudades</text>
+
+  <line x1="350" y1="330" x2="350" y2="365" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- A-1: solicitar datos -->
+  <rect x="180" y="365" width="340" height="100" rx="6" class="node-rect-f2"/>
+  <text x="350" y="392" class="node-label">A-1 · Solicitar datos</text>
+  <text x="350" y="410" class="node-sublabel">• Número de orden o código del examen</text>
+  <text x="350" y="423" class="node-sublabel">Si no lo tiene:</text>
+  <text x="350" y="438" class="node-sublabel">• Número de cédula del paciente</text>
+  <text x="350" y="451" class="node-sublabel">• Fecha del examen</text>
+  <text x="180" y="355" class="code-tag" text-anchor="start">F2.A1</text>
+
+  <line x1="350" y1="465" x2="350" y2="500" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- ESCALAR A2 -->
+  <rect x="180" y="500" width="340" height="80" rx="6" class="node-rect-escalate"/>
+  <text x="350" y="528" class="node-label" style="font-size:13px">ESCALAR A ASESOR</text>
+  <text x="350" y="545" class="node-sublabel">Contexto: ciudad, cédula u orden, fecha</text>
+  <text x="350" y="558" class="node-sublabel">El asesor verifica estado en sistema</text>
+  <text x="350" y="571" class="node-sublabel">y comparte enlace de página web</text>
+
+  <line x1="350" y1="580" x2="350" y2="615" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- API web Interlab -->
+  <ellipse cx="350" cy="630" rx="120" ry="14" class="node-api"/>
+  <rect x="230" y="630" width="240" height="34" class="node-api"/>
+  <ellipse cx="350" cy="664" rx="120" ry="14" class="node-api"/>
+  <text x="350" y="652" class="api-label">www.interlab.com.ec/resultados</text>
+
+  <line x1="350" y1="678" x2="350" y2="715" class="connector" marker-end="url(#arrow2)"/>
+
+  <rect x="230" y="715" width="240" height="65" rx="6" class="node-rect-info"/>
+  <text x="350" y="740" class="node-label-dark" style="font-size:11px">Sugerencia: Historial Clínico</text>
+  <text x="350" y="757" class="node-sublabel-dark">Crear/acceder al historial</text>
+  <text x="350" y="770" class="node-sublabel-dark">en GYE, UIO, CUE (F8)</text>
+
+  <line x1="350" y1="780" x2="350" y2="820" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- ── RUTA B — CONVENIO / LAB ── -->
+  <line x1="830" y1="215" x2="1050" y2="215" class="connector"/>
+  <line x1="1050" y1="215" x2="1050" y2="270" class="connector" marker-end="url(#arrow2)"/>
+  <text x="935" y="205" class="flow-label">CONVENIO · LAB</text>
+
+  <rect x="920" y="270" width="260" height="60" rx="6" class="node-rect-light"/>
+  <text x="1050" y="295" class="node-label-dark" style="font-size:12px; fill:#185FA5">RUTA B · Convenio / Laboratorio</text>
+  <text x="1050" y="313" class="node-sublabel-dark">Disponible solo en GYE, UIO y CUE</text>
+
+  <line x1="1050" y1="330" x2="1050" y2="365" class="connector" marker-end="url(#arrow2)"/>
+
+  <rect x="920" y="365" width="260" height="60" rx="6" class="node-rect-f2"/>
+  <text x="1050" y="392" class="node-label">B-1 · Identificación de convenio</text>
+  <text x="1050" y="409" class="node-sublabel">Número de convenio · Lab · RUC</text>
+  <text x="920" y="355" class="code-tag" text-anchor="start">F2.B1</text>
+
+  <line x1="1050" y1="425" x2="1050" y2="460" class="connector" marker-end="url(#arrow2)"/>
+
+  <rect x="880" y="460" width="340" height="100" rx="6" class="node-rect-f2"/>
+  <text x="1050" y="488" class="node-label">B-2 · Datos del paciente</text>
+  <text x="1050" y="505" class="node-sublabel">• Nombre completo</text>
+  <text x="1050" y="518" class="node-sublabel">• Cédula del paciente</text>
+  <text x="1050" y="531" class="node-sublabel">• Número de orden o código</text>
+  <text x="1050" y="544" class="node-sublabel">• Fecha del examen</text>
+  <text x="880" y="450" class="code-tag" text-anchor="start">F2.B2</text>
+
+  <line x1="1050" y1="560" x2="1050" y2="595" class="connector" marker-end="url(#arrow2)"/>
+
+  <rect x="880" y="595" width="340" height="80" rx="6" class="node-rect-escalate"/>
+  <text x="1050" y="623" class="node-label" style="font-size:13px">ESCALAR A ASESOR</text>
+  <text x="1050" y="640" class="node-sublabel">Contexto: convenio + datos del paciente</text>
+  <text x="1050" y="653" class="node-sublabel">El asesor verifica resultados</text>
+  <text x="1050" y="666" class="node-sublabel">y comparte enlace</text>
+
+  <line x1="1050" y1="675" x2="1050" y2="820" class="connector" marker-end="url(#arrow2)"/>
+
+  <!-- CIERRE COMÚN -->
+  <rect x="540" y="820" width="320" height="50" rx="6" class="node-rect-end"/>
+  <text x="700" y="848" class="node-label">Mensaje final institucional</text>
+  <text x="700" y="863" class="node-sublabel">Sedes + Atención 24/7 + cierre amigable</text>
+
+  <!-- ALERTA LEGAL -->
+  <rect x="60" y="950" width="1280" height="120" rx="6" fill="#FCEBEB" stroke="#A32D2D" stroke-width="1.5"/>
+  <text x="700" y="980" class="node-label-dark" style="font-size:14px; fill:#A32D2D">⚠ Restricción legal del Flujo 2</text>
+  <text x="700" y="1005" class="node-sublabel-dark" style="font-size:11px">Los resultados de laboratorio NUNCA se entregan por WhatsApp ni por correo electrónico desde el agente.</text>
+  <text x="700" y="1020" class="node-sublabel-dark" style="font-size:11px">Razón: confidencialidad de información médica. Muchas conversaciones son con datos del cliente, no del paciente.</text>
+  <text x="700" y="1037" class="node-sublabel-dark" style="font-size:11px"><tspan font-weight="700">Pasos válidos para acceder a resultados:</tspan> página web (con código y clave del comprobante) · historial</text>
+  <text x="700" y="1051" class="node-sublabel-dark" style="font-size:11px">clínico (en GYE/UIO/CUE) · retiro presencial en sede con cédula. Casos especiales: bajo aprobación interna explícita.</text>
+
+  <!-- Próximo paso documento -->
+  <rect x="60" y="1100" width="1280" height="60" rx="6" fill="#FAEEDA" stroke="#FAC775" stroke-width="1.5"/>
+  <text x="700" y="1125" class="node-label-dark" style="font-size:12px; fill:#7C4F0F">Próximo paso definido en el documento</text>
+  <text x="700" y="1145" class="node-sublabel-dark" style="font-size:10.5px">Revisión legal del Flujo 2 (Resultados) antes de cualquier prueba con usuarios reales — frente abierto en el documento original.</text>
+
+</svg>
+
+
+<!-- ════════════════ FLUJO 4 - TIEMPOS DE ENTREGA ════════════════ -->
+<div class="section-header f4">
+  <div class="section-tag">FLUJO 4 · TIEMPOS DE ENTREGA Y TIPOS DE MUESTRA</div>
+  <div class="section-title">Tasa de automatización esperada: +95%</div>
+  <div class="section-desc">Alto volumen, bajo riesgo clínico. El agente responde directamente con tres datos: tipo de muestra, preparación y tiempo de entrega para la ciudad consultada. Si el examen ya fue mencionado en sesión, usa el contexto.</div>
+</div>
+
+<svg class="flow" viewBox="0 0 1400 1230" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrow4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <!-- INICIO: pregunta del usuario -->
+  <rect x="500" y="30" width="400" height="65" rx="6" class="node-rect-f4"/>
+  <text x="700" y="58" class="node-label">Usuario consulta tiempo o preparación</text>
+  <text x="700" y="76" class="node-sublabel">"cuánto demora..." · "tengo que estar en ayunas?" · "qué muestra necesitan..."</text>
+
+  <line x1="700" y1="95" x2="700" y2="130" class="connector" marker-end="url(#arrow4)"/>
+
+  <!-- DECISIÓN: ¿Examen identificado en mensaje? -->
+  <polygon points="700,130 850,200 700,270 550,200" class="node-decision"/>
+  <text x="700" y="195" class="node-label-dark">¿Examen identificado</text>
+  <text x="700" y="212" class="node-label-dark">en el mensaje?</text>
+
+  <!-- NO -->
+  <line x1="550" y1="200" x2="350" y2="200" class="connector"/>
+  <line x1="350" y1="200" x2="350" y2="280" class="connector" marker-end="url(#arrow4)"/>
+  <text x="450" y="190" class="flow-label">NO</text>
+
+  <rect x="180" y="280" width="340" height="60" rx="6" class="node-rect-f4"/>
+  <text x="350" y="305" class="node-label">Solicitar el examen específico</text>
+  <text x="350" y="322" class="node-sublabel">"¿De qué examen se trata?" — sin respuestas genéricas</text>
+  <text x="180" y="270" class="code-tag" text-anchor="start">F4.S3</text>
+
+  <line x1="350" y1="340" x2="350" y2="375" class="connector" marker-end="url(#arrow4)"/>
+
+  <rect x="220" y="375" width="260" height="55" rx="6" class="node-rect-light"/>
+  <text x="350" y="400" class="node-label-dark" style="font-size:11px; fill:#533AB7">Usuario indica examen</text>
+  <text x="350" y="417" class="node-sublabel-dark">Ahora con dato</text>
+
+  <line x1="350" y1="430" x2="350" y2="490" class="connector" marker-end="url(#arrow4)"/>
+  <line x1="350" y1="490" x2="700" y2="490" class="connector"/>
+
+  <!-- SÍ -->
+  <line x1="700" y1="270" x2="700" y2="490" class="connector" marker-end="url(#arrow4)"/>
+  <text x="715" y="345" class="flow-label">SÍ</text>
+
+  <!-- DECISIÓN: ¿Ciudad identificada? -->
+  <polygon points="700,490 830,560 700,630 570,560" class="node-decision"/>
+  <text x="700" y="555" class="node-label-dark">¿Ciudad identificada</text>
+  <text x="700" y="572" class="node-label-dark">en sesión?</text>
+
+  <!-- NO ciudad → solicitar -->
+  <line x1="570" y1="560" x2="350" y2="560" class="connector"/>
+  <line x1="350" y1="560" x2="350" y2="640" class="connector" marker-end="url(#arrow4)"/>
+  <text x="465" y="550" class="flow-label">NO</text>
+
+  <rect x="220" y="640" width="260" height="55" rx="6" class="node-rect-f4"/>
+  <text x="350" y="665" class="node-label">Solicitar ciudad</text>
+  <text x="350" y="682" class="node-sublabel">"¿Para qué ciudad?"</text>
+
+  <line x1="350" y1="695" x2="350" y2="770" class="connector"/>
+  <line x1="350" y1="770" x2="700" y2="770" class="connector"/>
+
+  <!-- SÍ ciudad → consultar API -->
+  <line x1="700" y1="630" x2="700" y2="770" class="connector" marker-end="url(#arrow4)"/>
+  <text x="715" y="700" class="flow-label">SÍ</text>
+
+  <!-- API consulta -->
+  <ellipse cx="700" cy="785" rx="170" ry="14" class="node-api"/>
+  <rect x="530" y="785" width="340" height="34" class="node-api"/>
+  <ellipse cx="700" cy="819" rx="170" ry="14" class="node-api"/>
+  <text x="700" y="807" class="api-label">API · Catálogo de exámenes (557 exámenes)</text>
+
+  <line x1="700" y1="833" x2="700" y2="870" class="connector" marker-end="url(#arrow4)"/>
+
+  <!-- RESPUESTA con 3 datos -->
+  <rect x="430" y="870" width="540" height="120" rx="6" class="node-rect-f4"/>
+  <text x="700" y="900" class="node-label" style="font-size:14px">Responder con los 3 datos</text>
+  <text x="700" y="924" class="node-sublabel" style="font-size:11px">• Tipo de muestra (sangre venosa, orina, hisopado, etc.)</text>
+  <text x="700" y="941" class="node-sublabel" style="font-size:11px">• Preparación (ayuno, primera orina de la mañana, sin ayuno, etc.)</text>
+  <text x="700" y="958" class="node-sublabel" style="font-size:11px">• Tiempo de entrega para la ciudad consultada</text>
+  <text x="700" y="977" class="node-sublabel" style="font-size:9.5px; opacity:0.8">El tiempo varía entre filiales — usar dato real de la API según ciudad</text>
+
+  <line x1="700" y1="990" x2="700" y2="1025" class="connector" marker-end="url(#arrow4)"/>
+
+  <!-- CIERRE -->
+  <rect x="540" y="1025" width="320" height="50" rx="6" class="node-rect-end"/>
+  <text x="700" y="1053" class="node-label">¿Algo más? · Cierre institucional</text>
+  <text x="700" y="1068" class="node-sublabel">Si SI: re-NLU. Si NO: mensaje final + sedes</text>
+
+  <!-- Caso especial S2: pregunta de seguimiento -->
+  <rect x="60" y="1130" width="1280" height="80" rx="6" fill="#EEEDFE" stroke="#7B5CD9" stroke-width="1"/>
+  <text x="700" y="1158" class="node-label-dark" style="font-size:12px; fill:#3D2A92">Caso especial S2 · Pregunta de seguimiento sobre examen ya mencionado</text>
+  <text x="700" y="1180" class="node-sublabel-dark" style="font-size:11px">Si el usuario ya mencionó el examen y solo pregunta "y cuánto demora?" o "cuándo estaría listo?":</text>
+  <text x="700" y="1195" class="node-sublabel-dark" style="font-size:11px">el agente usa el contexto y responde directamente sin pedirle al usuario que repita el examen.</text>
+
+</svg>
+
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ════════════════ SECCIÓN: ATENCIÓN Y SERVICIO ════════════════ -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section-header" style="background: linear-gradient(90deg, #185FA5 0%, #378ADD 100%);">
+  <div class="section-tag">SECCIÓN · ATENCIÓN Y SERVICIO</div>
+  <div class="section-title">5 flujos transversales · Aplican a las 8 ciudades</div>
+  <div class="section-desc">F3 Domicilio · F6 Quejas y Reclamos · F7 Escalado al Equipo Humano · F10 Horarios y Sedes · F14 Preguntas Frecuentes. Vista panorámica de cada flujo.</div>
+</div>
+
+<!-- ─── F3 · SERVICIO A DOMICILIO ─── -->
+<svg class="flow" viewBox="0 0 1400 760" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <!-- Banner del flujo -->
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5" font-weight="700">FLUJO 3</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#0E4178" font-weight="700">Servicio a Domicilio · Toma de muestra en casa</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#185FA5" text-anchor="end">Cobertura por sector · Coordinación vía asesor</text>
+
+  <!-- Inicio -->
+  <rect x="540" y="100" width="320" height="60" rx="6" class="node-rect-f2"/>
+  <text x="700" y="125" class="node-label">Usuario solicita servicio a domicilio</text>
+  <text x="700" y="142" class="node-sublabel">"hacen domicilio?" · "no puedo ir al laboratorio"</text>
+
+  <line x1="700" y1="160" x2="700" y2="195" class="connector" marker-end="url(#arrowF3)"/>
+
+  <!-- Paso 1: pedir ciudad + ubicación -->
+  <rect x="500" y="195" width="400" height="55" rx="6" class="node-rect-f2"/>
+  <text x="700" y="220" class="node-label">Identificar ciudad + ubicación / dirección</text>
+  <text x="700" y="237" class="node-sublabel">SIEMPRE preguntar ciudad primero · ubicación GPS o dirección manual</text>
+
+  <line x1="700" y1="250" x2="700" y2="285" class="connector" marker-end="url(#arrowF3)"/>
+
+  <!-- Decisión cobertura -->
+  <polygon points="700,285 830,355 700,425 570,355" class="node-decision"/>
+  <text x="700" y="350" class="node-label-dark">¿Sector con cobertura</text>
+  <text x="700" y="367" class="node-label-dark">de domicilio?</text>
+
+  <!-- NO cobertura · Guayaquil → ofrecer sede cercana -->
+  <line x1="570" y1="355" x2="280" y2="355" class="connector"/>
+  <line x1="280" y1="355" x2="280" y2="445" class="connector" marker-end="url(#arrowF3)"/>
+  <text x="425" y="345" class="flow-label">NO cobertura</text>
+
+  <rect x="120" y="445" width="320" height="80" rx="6" class="node-rect-info"/>
+  <text x="280" y="470" class="node-label-dark" style="font-size:11px">Sin cobertura</text>
+  <text x="280" y="488" class="node-sublabel-dark">GYE: ofrecer sede cercana + cotización</text>
+  <text x="280" y="503" class="node-sublabel-dark">Provincias: informar contacto de filial</text>
+  <text x="280" y="518" class="node-sublabel-dark">+ ofrecer cotización con prioridad</text>
+
+  <!-- SÍ cobertura → recopilar datos -->
+  <line x1="700" y1="425" x2="700" y2="460" class="connector" marker-end="url(#arrowF3)"/>
+  <text x="715" y="445" class="flow-label">SÍ</text>
+
+  <rect x="500" y="460" width="400" height="100" rx="6" class="node-rect-f2"/>
+  <text x="700" y="485" class="node-label">Recopilar datos del servicio</text>
+  <text x="700" y="503" class="node-sublabel">• Exámenes a realizarse · Fecha</text>
+  <text x="700" y="517" class="node-sublabel">• Tipo de cliente (seguro / particular)</text>
+  <text x="700" y="531" class="node-sublabel">• Nombre completo del PACIENTE (no del solicitante)</text>
+  <text x="700" y="545" class="node-sublabel">• Número de celular de contacto</text>
+
+  <line x1="700" y1="560" x2="700" y2="595" class="connector" marker-end="url(#arrowF3)"/>
+
+  <!-- ESCALAR -->
+  <rect x="500" y="595" width="400" height="65" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="622" class="node-label" style="font-size:13px">ESCALAR A ASESOR</text>
+  <text x="700" y="640" class="node-sublabel">Asesor confirma disponibilidad y coordina la visita</text>
+  <text x="700" y="654" class="node-sublabel">En provincias: el asesor central deriva a la filial correspondiente</text>
+
+  <!-- Toma en vehículo nota -->
+  <rect x="940" y="460" width="380" height="100" rx="6" class="node-rect-info"/>
+  <text x="1130" y="485" class="node-label-dark" style="font-size:11px">Toma en vehículo (Guayaquil)</text>
+  <text x="1130" y="503" class="node-sublabel-dark">Sin costo adicional para pacientes</text>
+  <text x="1130" y="517" class="node-sublabel-dark">con dificultad de movilidad.</text>
+  <text x="1130" y="535" class="node-sublabel-dark">Se cotiza solo el examen vía F1</text>
+  <text x="1130" y="549" class="node-sublabel-dark">(sin cargo de domicilio).</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="940" y="595" width="380" height="55" rx="6" class="node-rect-pending"/>
+  <circle cx="965" cy="623" r="11" fill="#fff"/>
+  <text x="965" y="628" class="api-label" style="fill:#BA7517">!</text>
+  <text x="1140" y="618" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="1140" y="635" class="pending-label" style="font-size:9px">Confirmar valor del costo fijo del servicio a domicilio</text>
+</svg>
+
+
+<!-- ─── F6 · QUEJAS Y RECLAMOS ─── -->
+<svg class="flow" viewBox="0 0 1400 770" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5" font-weight="700">FLUJO 6</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#0E4178" font-weight="700">Quejas y Reclamos · Genera ticket rastreable</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#185FA5" text-anchor="end">Aplica a todas las ciudades · Tono empático</text>
+
+  <!-- Inicio -->
+  <rect x="500" y="100" width="400" height="60" rx="6" class="node-rect-f2"/>
+  <text x="700" y="125" class="node-label">Usuario expresa insatisfacción</text>
+  <text x="700" y="142" class="node-sublabel">"quiero quejarme..." · "estoy molesto..." · "me cobraron de más"</text>
+
+  <line x1="700" y1="160" x2="700" y2="195" class="connector" marker-end="url(#arrowF6)"/>
+
+  <!-- Decisión: ¿Hubo paciente atendido? -->
+  <polygon points="700,195 830,265 700,335 570,265" class="node-decision"/>
+  <text x="700" y="260" class="node-label-dark">¿Hubo paciente</text>
+  <text x="700" y="278" class="node-label-dark">atendido relacionado?</text>
+
+  <!-- SÍ paciente -->
+  <line x1="570" y1="265" x2="280" y2="265" class="connector"/>
+  <line x1="280" y1="265" x2="280" y2="365" class="connector" marker-end="url(#arrowF6)"/>
+  <text x="425" y="255" class="flow-label">SÍ paciente</text>
+
+  <rect x="100" y="365" width="360" height="100" rx="6" class="node-rect-f2"/>
+  <text x="280" y="390" class="node-label">Recopilar datos del paciente</text>
+  <text x="280" y="408" class="node-sublabel">• Nombre completo del PACIENTE atendido</text>
+  <text x="280" y="422" class="node-sublabel">• Cédula del paciente</text>
+  <text x="280" y="436" class="node-sublabel">• Número de orden o fecha del examen</text>
+  <text x="280" y="450" class="node-sublabel">• Descripción detallada de lo ocurrido</text>
+
+  <!-- NO paciente -->
+  <line x1="830" y1="265" x2="1120" y2="265" class="connector"/>
+  <line x1="1120" y1="265" x2="1120" y2="365" class="connector" marker-end="url(#arrowF6)"/>
+  <text x="975" y="255" class="flow-label">SIN paciente</text>
+
+  <rect x="940" y="365" width="360" height="100" rx="6" class="node-rect-f2"/>
+  <text x="1120" y="390" class="node-label">Recopilar datos del incidente</text>
+  <text x="1120" y="408" class="node-sublabel">• Ciudad donde ocurrió</text>
+  <text x="1120" y="422" class="node-sublabel">• Lugar (sede, teléfono, web, etc.)</text>
+  <text x="1120" y="436" class="node-sublabel">• Fecha aproximada</text>
+  <text x="1120" y="450" class="node-sublabel">• Descripción de lo ocurrido</text>
+
+  <!-- Convergen -->
+  <line x1="280" y1="465" x2="280" y2="510" class="connector"/>
+  <line x1="280" y1="510" x2="700" y2="510" class="connector"/>
+  <line x1="1120" y1="465" x2="1120" y2="510" class="connector"/>
+  <line x1="1120" y1="510" x2="700" y2="510" class="connector"/>
+  <line x1="700" y1="510" x2="700" y2="545" class="connector" marker-end="url(#arrowF6)"/>
+
+  <!-- Decisión URGENTE -->
+  <polygon points="700,545 850,605 700,665 550,605" class="node-decision"/>
+  <text x="700" y="600" class="node-label-dark">¿Caso con implicación</text>
+  <text x="700" y="617" class="node-label-dark">médica urgente?</text>
+
+  <!-- SÍ urgente -->
+  <line x1="850" y1="605" x2="1100" y2="605" class="connector"/>
+  <line x1="1100" y1="605" x2="1100" y2="685" class="connector" marker-end="url(#arrowF6)"/>
+  <text x="975" y="595" class="flow-label">SÍ urgente</text>
+
+  <rect x="900" y="685" width="400" height="55" rx="6" class="node-rect-escalate"/>
+  <text x="1100" y="710" class="node-label" style="font-size:13px">ESCALADO INMEDIATO</text>
+  <text x="1100" y="728" class="node-sublabel">Usuario especializado de Q&amp;R</text>
+
+  <!-- NO urgente -->
+  <line x1="700" y1="665" x2="700" y2="685" class="connector" marker-end="url(#arrowF6)"/>
+  <text x="715" y="678" class="flow-label">NO</text>
+
+  <rect x="500" y="685" width="400" height="55" rx="6" class="node-rect-light" style="fill:#E1F5EE; stroke:#9FE1CB"/>
+  <text x="700" y="710" class="node-label-dark" style="font-size:13px; fill:#0F6E56">Generar ticket rastreable</text>
+  <text x="700" y="728" class="node-sublabel-dark">"Su caso ha sido registrado con el número INL-2026-XXXXX"</text>
+
+  <!-- Confirmación SLA -->
+  <rect x="100" y="685" width="360" height="55" rx="6" class="node-rect-info"/>
+  <text x="280" y="710" class="node-label-dark" style="font-size:11px">SLA al usuario</text>
+  <text x="280" y="728" class="node-sublabel-dark">Especialista responde en máximo 24h hábiles</text>
+</svg>
+
+
+<!-- ─── F7 · ESCALADO AL EQUIPO HUMANO ─── -->
+<svg class="flow" viewBox="0 0 1400 620" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5" font-weight="700">FLUJO 7</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#0E4178" font-weight="700">Escalado al Equipo Humano · Transferencia con contexto completo</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#185FA5" text-anchor="end">El usuario nunca repite información</text>
+
+  <!-- Trigger central: 3 maneras de escalar -->
+  <rect x="60" y="100" width="380" height="80" rx="6" class="node-rect-light"/>
+  <text x="250" y="125" class="node-label-dark" style="font-size:12px; fill:#185FA5">Solicitud explícita</text>
+  <text x="250" y="143" class="node-sublabel-dark">"asesor" · "humano" · "supervisor"</text>
+  <text x="250" y="158" class="node-sublabel-dark">"esto no me lo puede resolver un bot"</text>
+
+  <rect x="510" y="100" width="380" height="80" rx="6" class="node-rect-light"/>
+  <text x="700" y="125" class="node-label-dark" style="font-size:12px; fill:#185FA5">Detección automática</text>
+  <text x="700" y="143" class="node-sublabel-dark">2 loops sin resolución · API caída</text>
+  <text x="700" y="158" class="node-sublabel-dark">3 intentos fallidos de autenticación</text>
+
+  <rect x="960" y="100" width="380" height="80" rx="6" class="node-rect-light"/>
+  <text x="1150" y="125" class="node-label-dark" style="font-size:12px; fill:#185FA5">Fuera de horario</text>
+  <text x="1150" y="143" class="node-sublabel-dark">L-V 7:00-19:00 · Sáb 8:00-13:00</text>
+  <text x="1150" y="158" class="node-sublabel-dark">Urgencias: 04-2594010 · 24/7</text>
+
+  <line x1="250" y1="180" x2="250" y2="220" class="connector"/>
+  <line x1="700" y1="180" x2="700" y2="220" class="connector"/>
+  <line x1="1150" y1="180" x2="1150" y2="220" class="connector"/>
+  <line x1="250" y1="220" x2="700" y2="220" class="connector"/>
+  <line x1="1150" y1="220" x2="700" y2="220" class="connector"/>
+  <line x1="700" y1="220" x2="700" y2="255" class="connector" marker-end="url(#arrowF7)"/>
+
+  <!-- Interrumpir flujo activo -->
+  <rect x="460" y="255" width="480" height="55" rx="6" class="node-rect-f2"/>
+  <text x="700" y="280" class="node-label">Interrumpir flujo activo inmediatamente</text>
+  <text x="700" y="297" class="node-sublabel">No termina el paso en curso · transfiere al instante</text>
+
+  <line x1="700" y1="310" x2="700" y2="345" class="connector" marker-end="url(#arrowF7)"/>
+
+  <!-- ESCALAR con contexto -->
+  <rect x="380" y="345" width="640" height="105" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="372" class="node-label" style="font-size:14px">ESCALAR A ASESOR · Contexto completo</text>
+  <text x="700" y="395" class="node-sublabel">• Nombre del usuario (si fue capturado)</text>
+  <text x="700" y="410" class="node-sublabel">• Cédula (si fue proporcionada)</text>
+  <text x="700" y="425" class="node-sublabel">• Flujo activo + resumen de lo solicitado</text>
+  <text x="700" y="440" class="node-sublabel">• Historial completo de la conversación</text>
+
+  <line x1="700" y1="450" x2="700" y2="485" class="connector" marker-end="url(#arrowF7)"/>
+
+  <!-- Mensaje al usuario según horario -->
+  <rect x="60" y="485" width="600" height="100" rx="6" class="node-rect-info"/>
+  <text x="360" y="510" class="node-label-dark" style="font-size:11px">Horario regular</text>
+  <text x="360" y="528" class="node-sublabel-dark">"Voy a conectarle con uno de</text>
+  <text x="360" y="542" class="node-sublabel-dark">nuestros asesores. Tiempo estimado:</text>
+  <text x="360" y="556" class="node-sublabel-dark">aproximadamente 10 minutos."</text>
+
+  <rect x="740" y="485" width="600" height="100" rx="6" class="node-rect-info"/>
+  <text x="1040" y="510" class="node-label-dark" style="font-size:11px">Posterior a 22:00 · Personal de guardia</text>
+  <text x="1040" y="528" class="node-sublabel-dark">"En este momento estamos fuera del horario regular.</text>
+  <text x="1040" y="542" class="node-sublabel-dark">Su solicitud será gestionada por personal de guardia.</text>
+  <text x="1040" y="556" class="node-sublabel-dark">Si es urgente: 04-2594010 · 24 horas."</text>
+</svg>
+
+
+<!-- ─── F10 · HORARIOS Y PUNTOS DE ATENCIÓN ─── -->
+<svg class="flow" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF10" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5" font-weight="700">FLUJO 10 · AUTOMATIZADO</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#0E4178" font-weight="700">Horarios y Puntos de Atención · Tasa esperada +99%</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#185FA5" text-anchor="end">Información de la web oficial · Pin de WhatsApp</text>
+
+  <!-- Inicio -->
+  <rect x="540" y="100" width="320" height="55" rx="6" class="node-rect"/>
+  <text x="700" y="125" class="node-label">Usuario consulta horarios o sedes</text>
+  <text x="700" y="142" class="node-sublabel">"a qué hora abren?" · "dónde están?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF10)"/>
+
+  <!-- Identificar ciudad -->
+  <rect x="540" y="190" width="320" height="55" rx="6" class="node-rect"/>
+  <text x="700" y="215" class="node-label">Identificar ciudad (si no está en sesión)</text>
+  <text x="700" y="232" class="node-sublabel">8 ciudades disponibles</text>
+
+  <line x1="700" y1="245" x2="700" y2="280" class="connector" marker-end="url(#arrowF10)"/>
+
+  <!-- Preguntar sede o ubicación -->
+  <rect x="500" y="280" width="400" height="60" rx="6" class="node-rect"/>
+  <text x="700" y="305" class="node-label">Sede preferida o ubicación cercana</text>
+  <text x="700" y="322" class="node-sublabel">Lista de sedes · Ubicación GPS · Sector mencionado</text>
+
+  <line x1="700" y1="340" x2="700" y2="375" class="connector" marker-end="url(#arrowF10)"/>
+
+  <!-- API web -->
+  <ellipse cx="700" cy="390" rx="170" ry="14" class="node-api"/>
+  <rect x="530" y="390" width="340" height="34" class="node-api"/>
+  <ellipse cx="700" cy="424" rx="170" ry="14" class="node-api"/>
+  <text x="700" y="412" class="api-label">API · www.interlab.com.ec (datos en tiempo real)</text>
+
+  <line x1="700" y1="438" x2="700" y2="475" class="connector" marker-end="url(#arrowF10)"/>
+
+  <!-- Respuesta -->
+  <rect x="430" y="475" width="540" height="80" rx="6" class="node-rect-light"/>
+  <text x="700" y="500" class="node-label-dark" style="font-size:13px; fill:#0F6E56">Entregar información de sede</text>
+  <text x="700" y="520" class="node-sublabel-dark">Horario · Dirección exacta · Pin de ubicación en WhatsApp</text>
+  <text x="700" y="535" class="node-sublabel-dark">Atención 24/7 en GYE, Machala y Portoviejo</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="1000" y="190" width="350" height="80" rx="6" class="node-rect-pending"/>
+  <circle cx="1025" cy="225" r="11" fill="#fff"/>
+  <text x="1025" y="230" class="api-label" style="fill:#BA7517">!</text>
+  <text x="1185" y="220" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="1185" y="235" class="pending-label" style="font-size:9px">Confirmar mecanismo de integración</text>
+  <text x="1185" y="248" class="pending-label" style="font-size:9px">con la web para datos actualizados</text>
+  <text x="1185" y="261" class="pending-label" style="font-size:9px">en tiempo real</text>
+</svg>
+
+
+<!-- ─── F14 · PREGUNTAS FRECUENTES ─── -->
+<svg class="flow" viewBox="0 0 1400 580" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF14" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#E6F1FB" stroke="#B5D4F4"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5" font-weight="700">FLUJO 14 · AUTOMATIZADO</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#0E4178" font-weight="700">Preguntas Frecuentes · Base de conocimiento</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#185FA5" text-anchor="end">Sin APIs · Si no hay respuesta: escala, no inventa</text>
+
+  <!-- Inicio -->
+  <rect x="540" y="100" width="320" height="55" rx="6" class="node-rect"/>
+  <text x="700" y="125" class="node-label">Usuario consulta · Categorizar</text>
+  <text x="700" y="142" class="node-sublabel">NLU clasifica la pregunta en una categoría</text>
+
+  <line x1="700" y1="155" x2="700" y2="195" class="connector" marker-end="url(#arrowF14)"/>
+
+  <!-- 4 categorías -->
+  <rect x="60" y="195" width="305" height="100" rx="6" class="node-rect"/>
+  <text x="212" y="220" class="node-label">A · Preparación de exámenes</text>
+  <text x="212" y="240" class="node-sublabel">"me tengo que quedar en ayunas?"</text>
+  <text x="212" y="255" class="node-sublabel">"puedo tomar medicamentos?"</text>
+  <text x="212" y="275" class="node-sublabel" style="font-size:9px">→ ayuno por examen específico</text>
+
+  <rect x="385" y="195" width="305" height="100" rx="6" class="node-rect"/>
+  <text x="537" y="220" class="node-label">B · Acreditaciones y calidad</text>
+  <text x="537" y="240" class="node-sublabel">"están acreditados?"</text>
+  <text x="537" y="255" class="node-sublabel">"son confiables sus resultados?"</text>
+  <text x="537" y="275" class="node-sublabel" style="font-size:9px">→ SAE ISO 15189 · ISO 9001</text>
+
+  <rect x="710" y="195" width="305" height="100" rx="6" class="node-rect"/>
+  <text x="862" y="220" class="node-label">C · Resultados y confidencialidad</text>
+  <text x="862" y="240" class="node-sublabel">"mis resultados son confidenciales?"</text>
+  <text x="862" y="255" class="node-sublabel">"cómo llegan mis resultados?"</text>
+  <text x="862" y="275" class="node-sublabel" style="font-size:9px">→ web · historial · sede presencial</text>
+
+  <rect x="1035" y="195" width="305" height="100" rx="6" class="node-rect"/>
+  <text x="1187" y="220" class="node-label">D · Pregunta no identificada</text>
+  <text x="1187" y="240" class="node-sublabel">No encaja en categoría conocida</text>
+  <text x="1187" y="260" class="node-sublabel">→ Escalar a asesor</text>
+  <text x="1187" y="275" class="node-sublabel" style="font-size:9px">No inventar respuestas</text>
+
+  <line x1="212" y1="295" x2="212" y2="335" class="connector"/>
+  <line x1="537" y1="295" x2="537" y2="335" class="connector"/>
+  <line x1="862" y1="295" x2="862" y2="335" class="connector"/>
+  <line x1="212" y1="335" x2="862" y2="335" class="connector"/>
+
+  <line x1="1187" y1="295" x2="1187" y2="335" class="connector"/>
+  <line x1="1187" y1="335" x2="1187" y2="395" class="connector" marker-end="url(#arrowF14)"/>
+
+  <line x1="537" y1="335" x2="537" y2="395" class="connector" marker-end="url(#arrowF14)"/>
+
+  <!-- Respuestas -->
+  <rect x="200" y="395" width="675" height="55" rx="6" class="node-rect-light"/>
+  <text x="537" y="420" class="node-label-dark" style="font-size:12px; fill:#0F6E56">Respuesta directa desde base de conocimiento</text>
+  <text x="537" y="437" class="node-sublabel-dark">Categorías A, B, C · Cierre con "¿algo más?"</text>
+
+  <rect x="985" y="395" width="400" height="55" rx="6" class="node-rect-escalate"/>
+  <text x="1185" y="420" class="node-label" style="font-size:12px">ESCALAR A ASESOR</text>
+  <text x="1185" y="437" class="node-sublabel">Categoría D · Sin inventar</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="350" y="490" width="700" height="55" rx="6" class="node-rect-pending"/>
+  <circle cx="375" cy="518" r="11" fill="#fff"/>
+  <text x="375" y="523" class="api-label" style="fill:#BA7517">!</text>
+  <text x="700" y="513" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="700" y="530" class="pending-label" style="font-size:9px">Confirmar años de trayectoria y otros datos institucionales para completar respuestas en categoría B</text>
+</svg>
+
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ════════════════ SECCIÓN: CONVENIOS Y LABORATORIOS ══════════ -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section-header" style="background: linear-gradient(90deg, #533AB7 0%, #7B5CD9 100%);">
+  <div class="section-tag">SECCIÓN · CONVENIOS Y LABORATORIOS</div>
+  <div class="section-title">5 flujos · Restricciones por ciudad y tipo de cliente</div>
+  <div class="section-desc">F8 Historial Clínico · F11 Guías de Retiro · F12 Solicitud de Insumos · F13 Comprobantes · F15 Agregar Pruebas. Mayoría con cobertura limitada a Guayaquil o GYE/UIO/CUE.</div>
+</div>
+
+<!-- ─── F8 · HISTORIAL CLÍNICO ─── -->
+<svg class="flow" viewBox="0 0 1400 720" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#533AB7" font-weight="700">FLUJO 8</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#3D2A92" font-weight="700">Creación y Acceso al Historial Clínico</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#533AB7" text-anchor="end">Solo GYE / Quito / Cuenca · Solo clientes particulares</text>
+
+  <!-- Inicio -->
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Usuario solicita historial clínico</text>
+  <text x="700" y="142" class="node-sublabel">"quiero crear mi historial" · "cómo accedo a mis exámenes online?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF8)"/>
+
+  <!-- Decisión ciudad -->
+  <polygon points="700,190 830,255 700,320 570,255" class="node-decision"/>
+  <text x="700" y="250" class="node-label-dark">¿Ciudad es GYE,</text>
+  <text x="700" y="267" class="node-label-dark">UIO o CUE?</text>
+
+  <!-- NO ciudad -->
+  <line x1="570" y1="255" x2="280" y2="255" class="connector"/>
+  <line x1="280" y1="255" x2="280" y2="345" class="connector" marker-end="url(#arrowF8)"/>
+  <text x="425" y="245" class="flow-label">NO</text>
+
+  <rect x="100" y="345" width="360" height="80" rx="6" class="node-rect-info"/>
+  <text x="280" y="370" class="node-label-dark" style="font-size:11px">Servicio no disponible aún</text>
+  <text x="280" y="388" class="node-sublabel-dark">Tono amigable: limitación temporal</text>
+  <text x="280" y="402" class="node-sublabel-dark">No es rechazo. Se está trabajando para</text>
+  <text x="280" y="416" class="node-sublabel-dark">extenderlo a todas las ciudades.</text>
+
+  <!-- SÍ ciudad → Solicitar cédula -->
+  <line x1="700" y1="320" x2="700" y2="355" class="connector" marker-end="url(#arrowF8)"/>
+  <text x="715" y="340" class="flow-label">SÍ</text>
+
+  <rect x="500" y="355" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="380" class="node-label">Solicitar cédula del paciente</text>
+  <text x="700" y="397" class="node-sublabel">Identificador único · NO usar correo electrónico</text>
+
+  <line x1="700" y1="410" x2="700" y2="445" class="connector" marker-end="url(#arrowF8)"/>
+
+  <!-- API LIS -->
+  <ellipse cx="700" cy="460" rx="170" ry="14" class="node-api"/>
+  <rect x="530" y="460" width="340" height="34" class="node-api"/>
+  <ellipse cx="700" cy="494" rx="170" ry="14" class="node-api"/>
+  <text x="700" y="482" class="api-label">API · LIS Interlab (búsqueda por cédula)</text>
+
+  <line x1="700" y1="508" x2="700" y2="545" class="connector" marker-end="url(#arrowF8)"/>
+
+  <!-- 3 resultados -->
+  <rect x="60" y="545" width="400" height="100" rx="6" class="node-rect-light"/>
+  <text x="260" y="570" class="node-label-dark" style="font-size:12px; fill:#0F6E56">2a · Historial existente</text>
+  <text x="260" y="588" class="node-sublabel-dark">www.interlab.com.ec/historial</text>
+  <text x="260" y="602" class="node-sublabel-dark">Recuperación de contraseña</text>
+  <text x="260" y="618" class="node-sublabel-dark">en el mismo enlace</text>
+  <text x="260" y="635" class="code-tag" style="fill:#0F6E56">RESPUESTA INMEDIATA</text>
+
+  <rect x="500" y="545" width="400" height="100" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="570" class="node-label" style="font-size:12px">2b · Sin historial creado</text>
+  <text x="700" y="588" class="node-sublabel">Solicitar correo registrado</text>
+  <text x="700" y="602" class="node-sublabel">Escalar al asesor</text>
+  <text x="700" y="616" class="node-sublabel">para creación del historial</text>
+  <text x="700" y="635" class="code-tag" style="fill:#fff">ESCALAR ASESOR</text>
+
+  <rect x="940" y="545" width="400" height="100" rx="6" class="node-rect-info"/>
+  <text x="1140" y="570" class="node-label-dark" style="font-size:12px">2c · Cédula no encontrada</text>
+  <text x="1140" y="588" class="node-sublabel-dark">No hay historial sin examen previo</text>
+  <text x="1140" y="602" class="node-sublabel-dark">Si el usuario cree que hay error</text>
+  <text x="1140" y="616" class="node-sublabel-dark">→ ofrecer escalar a asesor</text>
+
+  <line x1="700" y1="545" x2="260" y2="545" class="connector"/>
+  <line x1="700" y1="545" x2="1140" y2="545" class="connector"/>
+</svg>
+
+
+<!-- ─── F11 · GUÍAS PARA RETIRO DE MUESTRAS ─── -->
+<svg class="flow" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF11" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#533AB7" font-weight="700">FLUJO 11</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#3D2A92" font-weight="700">Comunicación de Guías para Retiro de Muestras</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#533AB7" text-anchor="end">Solo Matriz Guayaquil · Solo convenios y laboratorios</text>
+
+  <!-- Inicio -->
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Convenio/Lab solicita envío de muestra</text>
+  <text x="700" y="142" class="node-sublabel">"voy a mandar las muestras" · "cómo envío mis muestras?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF11)"/>
+
+  <!-- Decisión: ¿Es para Matriz Guayaquil? -->
+  <polygon points="700,190 830,255 700,320 570,255" class="node-decision"/>
+  <text x="700" y="248" class="node-label-dark">¿Envío para Matriz</text>
+  <text x="700" y="266" class="node-label-dark">de Guayaquil?</text>
+
+  <line x1="570" y1="255" x2="280" y2="255" class="connector"/>
+  <line x1="280" y1="255" x2="280" y2="345" class="connector" marker-end="url(#arrowF11)"/>
+  <text x="425" y="245" class="flow-label">NO</text>
+
+  <rect x="120" y="345" width="320" height="55" rx="6" class="node-rect-info"/>
+  <text x="280" y="370" class="node-label-dark" style="font-size:11px">Aplica solo a Guayaquil</text>
+  <text x="280" y="388" class="node-sublabel-dark">Ofrecer escalar a asesor para otra sede</text>
+
+  <line x1="700" y1="320" x2="700" y2="355" class="connector" marker-end="url(#arrowF11)"/>
+  <text x="715" y="340" class="flow-label">SÍ</text>
+
+  <!-- Recopilar -->
+  <rect x="500" y="355" width="400" height="100" rx="6" class="node-rect-f4"/>
+  <text x="700" y="380" class="node-label">Recopilar datos del envío</text>
+  <text x="700" y="398" class="node-sublabel">• Guía de envío (imagen, PDF o captura)</text>
+  <text x="700" y="412" class="node-sublabel">• Cooperativa que realizó el envío</text>
+  <text x="700" y="426" class="node-sublabel">• Hora estimada de llegada/retiro</text>
+  <text x="700" y="440" class="node-sublabel">• Nombre de quien envía</text>
+
+  <line x1="700" y1="455" x2="700" y2="490" class="connector" marker-end="url(#arrowF11)"/>
+
+  <!-- Notificación al mensajero -->
+  <rect x="500" y="490" width="400" height="65" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="517" class="node-label" style="font-size:13px">Notificar al mensajero de turno</text>
+  <text x="700" y="535" class="node-sublabel">Reenvío automático con guía + datos</text>
+  <text x="700" y="548" class="node-sublabel">vía mensaje interno (WhatsApp / chat / correo)</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="940" y="345" width="380" height="120" rx="6" class="node-rect-pending"/>
+  <circle cx="965" cy="380" r="11" fill="#fff"/>
+  <text x="965" y="385" class="api-label" style="fill:#BA7517">!</text>
+  <text x="1130" y="375" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="1130" y="395" class="pending-label" style="font-size:9px">• Mecanismo de asignación del</text>
+  <text x="1130" y="408" class="pending-label" style="font-size:9px">  mensajero de turno</text>
+  <text x="1130" y="425" class="pending-label" style="font-size:9px">• Cómo se comparte la guía</text>
+  <text x="1130" y="438" class="pending-label" style="font-size:9px">  internamente</text>
+  <text x="1130" y="455" class="pending-label" style="font-size:9px">• Número/chat específico del mensajero</text>
+</svg>
+
+
+<!-- ─── F12 · SOLICITUD DE INSUMOS ─── -->
+<svg class="flow" viewBox="0 0 1400 580" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF12" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#533AB7" font-weight="700">FLUJO 12</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#3D2A92" font-weight="700">Solicitud de Insumos</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#533AB7" text-anchor="end">Solo convenios y laboratorios de Guayaquil</text>
+
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Convenio/Lab solicita insumos</text>
+  <text x="700" y="142" class="node-sublabel">"necesitamos tubos" · "solicitar reactivos"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF12)"/>
+
+  <polygon points="700,190 830,255 700,320 570,255" class="node-decision"/>
+  <text x="700" y="248" class="node-label-dark">¿Cliente convenio/lab</text>
+  <text x="700" y="266" class="node-label-dark">de Guayaquil?</text>
+
+  <!-- Cliente particular -->
+  <line x1="570" y1="255" x2="280" y2="255" class="connector"/>
+  <line x1="280" y1="255" x2="280" y2="345" class="connector" marker-end="url(#arrowF12)"/>
+  <text x="425" y="245" class="flow-label">PARTICULAR</text>
+
+  <rect x="120" y="345" width="320" height="60" rx="6" class="node-rect-info"/>
+  <text x="280" y="370" class="node-label-dark" style="font-size:11px">No aplica para particulares</text>
+  <text x="280" y="388" class="node-sublabel-dark">Solo para laboratorios referidos</text>
+  <text x="280" y="402" class="node-sublabel-dark">y empresas con convenio</text>
+
+  <!-- Otra ciudad -->
+  <line x1="830" y1="255" x2="1120" y2="255" class="connector"/>
+  <line x1="1120" y1="255" x2="1120" y2="345" class="connector" marker-end="url(#arrowF12)"/>
+  <text x="975" y="245" class="flow-label">OTRA CIUDAD</text>
+
+  <rect x="940" y="345" width="380" height="80" rx="6" class="node-rect-pending"/>
+  <circle cx="965" cy="375" r="11" fill="#fff"/>
+  <text x="965" y="380" class="api-label" style="fill:#BA7517">!</text>
+  <text x="1130" y="370" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="1130" y="390" class="pending-label" style="font-size:9px">Información de contacto por ciudad</text>
+  <text x="1130" y="403" class="pending-label" style="font-size:9px">para solicitud de insumos +</text>
+  <text x="1130" y="416" class="pending-label" style="font-size:9px">proceso interno de revisión</text>
+
+  <!-- SÍ GYE convenio -->
+  <line x1="700" y1="320" x2="700" y2="355" class="connector" marker-end="url(#arrowF12)"/>
+  <text x="715" y="340" class="flow-label">SÍ · CONVENIO GYE</text>
+
+  <rect x="500" y="355" width="400" height="85" rx="6" class="node-rect-f4"/>
+  <text x="700" y="378" class="node-label">Recopilar pedido</text>
+  <text x="700" y="396" class="node-sublabel">• Número de convenio · RUC · Razón social</text>
+  <text x="700" y="410" class="node-sublabel">• Insumos solicitados con cantidades</text>
+  <text x="700" y="424" class="node-sublabel">• Nombre de quien realiza la solicitud</text>
+
+  <line x1="700" y1="440" x2="700" y2="475" class="connector" marker-end="url(#arrowF12)"/>
+
+  <rect x="500" y="475" width="400" height="55" rx="6" class="node-rect-light"/>
+  <text x="700" y="500" class="node-label-dark" style="font-size:12px; fill:#0F6E56">Confirmar gestión en máximo 2 días hábiles</text>
+  <text x="700" y="517" class="node-sublabel-dark">El equipo de Interlab responde con detalle de entrega</text>
+</svg>
+
+
+<!-- ─── F13 · COMPROBANTES DE PAGO PARA FACTURACIÓN ─── -->
+<svg class="flow" viewBox="0 0 1400 580" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF13" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#533AB7" font-weight="700">FLUJO 13</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#3D2A92" font-weight="700">Comprobantes de Pago para Facturación</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#533AB7" text-anchor="end">Exclusivo Guayaquil · Redirige a coordinación de caja</text>
+
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Usuario solicita facturación</text>
+  <text x="700" y="142" class="node-sublabel">"necesito mi factura" · "les envío el comprobante"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF13)"/>
+
+  <polygon points="700,190 830,255 700,320 570,255" class="node-decision"/>
+  <text x="700" y="248" class="node-label-dark">Tipo de cliente</text>
+  <text x="700" y="266" class="node-label-dark">(Guayaquil)</text>
+
+  <!-- Cliente particular -->
+  <line x1="570" y1="255" x2="280" y2="255" class="connector"/>
+  <line x1="280" y1="255" x2="280" y2="345" class="connector" marker-end="url(#arrowF13)"/>
+  <text x="425" y="245" class="flow-label">PARTICULAR</text>
+
+  <rect x="100" y="345" width="360" height="120" rx="6" class="node-rect-f4"/>
+  <text x="280" y="370" class="node-label">Datos para factura particular</text>
+  <text x="280" y="390" class="node-sublabel">• Nombre/cédula del paciente</text>
+  <text x="280" y="404" class="node-sublabel">• Fecha de los exámenes</text>
+  <text x="280" y="418" class="node-sublabel">• Datos para factura: cédula, dirección,</text>
+  <text x="280" y="430" class="node-sublabel">  teléfono, correo electrónico</text>
+  <text x="280" y="445" class="node-sublabel">• Comprobante de pago (PDF/imagen)</text>
+
+  <!-- Convenio -->
+  <line x1="830" y1="255" x2="1120" y2="255" class="connector"/>
+  <line x1="1120" y1="255" x2="1120" y2="345" class="connector" marker-end="url(#arrowF13)"/>
+  <text x="975" y="245" class="flow-label">CONVENIO · LAB</text>
+
+  <rect x="940" y="345" width="360" height="120" rx="6" class="node-rect-f4"/>
+  <text x="1120" y="370" class="node-label">Datos para factura institucional</text>
+  <text x="1120" y="390" class="node-sublabel">• Número de laboratorio o convenio</text>
+  <text x="1120" y="404" class="node-sublabel">• RUC de la empresa</text>
+  <text x="1120" y="418" class="node-sublabel">• Fecha de los exámenes</text>
+  <text x="1120" y="432" class="node-sublabel">  (o nombres de pacientes)</text>
+  <text x="1120" y="448" class="node-sublabel">• Comprobante de pago</text>
+
+  <line x1="280" y1="465" x2="280" y2="500" class="connector"/>
+  <line x1="280" y1="500" x2="700" y2="500" class="connector"/>
+  <line x1="1120" y1="465" x2="1120" y2="500" class="connector"/>
+  <line x1="1120" y1="500" x2="700" y2="500" class="connector"/>
+  <line x1="700" y1="500" x2="700" y2="535" class="connector" marker-end="url(#arrowF13)"/>
+
+  <rect x="380" y="535" width="640" height="40" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="560" class="node-label" style="font-size:13px">Redirigir al número de coordinación de caja</text>
+</svg>
+
+
+<!-- ─── F15 · AGREGAR PRUEBAS A ORDEN EXISTENTE ─── -->
+<svg class="flow" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF15" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#533AB7" font-weight="700">FLUJO 15</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#3D2A92" font-weight="700">Agregar Pruebas a Orden Existente</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#533AB7" text-anchor="end">Particulares: 8 ciudades · Convenios: solo Guayaquil</text>
+
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Usuario quiere agregar pruebas</text>
+  <text x="700" y="142" class="node-sublabel">"me faltaron pedir unos exámenes" · "puedo agregar más?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF15)"/>
+
+  <rect x="500" y="190" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="215" class="node-label">Identificar ciudad + tipo cliente</text>
+  <text x="700" y="232" class="node-sublabel">Si ya hay contexto: usar sin volver a preguntar</text>
+
+  <line x1="700" y1="245" x2="700" y2="280" class="connector" marker-end="url(#arrowF15)"/>
+
+  <polygon points="700,280 830,345 700,410 570,345" class="node-decision"/>
+  <text x="700" y="338" class="node-label-dark">Tipo de cliente</text>
+  <text x="700" y="356" class="node-label-dark">y ciudad</text>
+
+  <!-- Particular cualquier ciudad -->
+  <line x1="570" y1="345" x2="280" y2="345" class="connector"/>
+  <line x1="280" y1="345" x2="280" y2="430" class="connector" marker-end="url(#arrowF15)"/>
+  <text x="425" y="335" class="flow-label">PARTICULAR</text>
+
+  <rect x="60" y="430" width="440" height="100" rx="6" class="node-rect-f4"/>
+  <text x="280" y="455" class="node-label">Solicitar orden + pruebas a agregar</text>
+  <text x="280" y="475" class="node-sublabel">• Número de orden o cédula del paciente</text>
+  <text x="280" y="489" class="node-sublabel">• Pruebas adicionales a agregar</text>
+  <text x="280" y="510" class="node-sublabel" style="font-size:9px">Cotizar con tarifa según contexto</text>
+  <text x="280" y="522" class="node-sublabel" style="font-size:9px">(particular, seguro, beneficio)</text>
+
+  <line x1="280" y1="530" x2="280" y2="565" class="connector" marker-end="url(#arrowF15)"/>
+
+  <rect x="60" y="565" width="440" height="80" rx="6" class="node-rect-escalate"/>
+  <text x="280" y="590" class="node-label" style="font-size:12px">ESCALAR · Verificación de muestra</text>
+  <text x="280" y="608" class="node-sublabel">GYE: asesor verifica disponibilidad</text>
+  <text x="280" y="622" class="node-sublabel">Provincias: asesor central deriva a filial</text>
+  <text x="280" y="636" class="node-sublabel">por correo asignado por ciudad</text>
+
+  <!-- Convenio -->
+  <line x1="830" y1="345" x2="1120" y2="345" class="connector"/>
+  <line x1="1120" y1="345" x2="1120" y2="430" class="connector" marker-end="url(#arrowF15)"/>
+  <text x="975" y="335" class="flow-label">CONVENIO · LAB</text>
+
+  <rect x="900" y="430" width="440" height="100" rx="6" class="node-rect-f4"/>
+  <text x="1120" y="455" class="node-label">Convenio · solo Guayaquil</text>
+  <text x="1120" y="475" class="node-sublabel">• Número de convenio o laboratorio</text>
+  <text x="1120" y="489" class="node-sublabel">• Número de orden o nombre del paciente</text>
+  <text x="1120" y="503" class="node-sublabel">• Pruebas a agregar</text>
+  <text x="1120" y="520" class="node-sublabel" style="font-size:9px">Cotizar con tarifa convenio</text>
+
+  <line x1="1120" y1="530" x2="1120" y2="565" class="connector" marker-end="url(#arrowF15)"/>
+
+  <rect x="900" y="565" width="440" height="80" rx="6" class="node-rect-escalate"/>
+  <text x="1120" y="590" class="node-label" style="font-size:12px">ESCALAR · Verificación</text>
+  <text x="1120" y="608" class="node-sublabel">Asesor verifica disponibilidad de muestra</text>
+  <text x="1120" y="622" class="node-sublabel">y confirma al cliente</text>
+  <text x="1120" y="636" class="node-sublabel">para gestionar el pago adicional</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="540" y="565" width="320" height="55" rx="6" class="node-rect-pending"/>
+  <circle cx="565" cy="592" r="11" fill="#fff"/>
+  <text x="565" y="597" class="api-label" style="fill:#BA7517">!</text>
+  <text x="700" y="588" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="700" y="603" class="pending-label" style="font-size:9px">Correos asignados por ciudad</text>
+  <text x="700" y="615" class="pending-label" style="font-size:9px">para gestión en provincias</text>
+</svg>
+
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ════════════════ SECCIÓN: FASE 4 ═══════════════════════════ -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section-header" style="background: linear-gradient(90deg, #BA7517 0%, #E89A2A 100%);">
+  <div class="section-tag">SECCIÓN · FASE 4</div>
+  <div class="section-title">2 flujos · Implementación posterior</div>
+  <div class="section-desc">Cita literal del documento: "Implementación: Fase 4 — después de que flujos 1, 2 y 4 estén estables en producción". F5 Saldos y Pagos Adicionales · F9 Test Dinámicos.</div>
+</div>
+
+<!-- ─── F5 · SALDOS Y PAGOS ADICIONALES ─── -->
+<svg class="flow" viewBox="0 0 1400 480" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#FAEEDA" stroke="#FAC775"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#BA7517" font-weight="700">FLUJO 5 · FASE 4</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#7C4F0F" font-weight="700">Saldos y Pagos Adicionales · El agente NO procesa cobros</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#BA7517" text-anchor="end">Recopila + escala al asesor</text>
+
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Usuario solicita pago</text>
+  <text x="700" y="142" class="node-sublabel">"tengo un saldo pendiente" · "cómo puedo pagar?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF5)"/>
+
+  <rect x="500" y="190" width="400" height="80" rx="6" class="node-rect-f4"/>
+  <text x="700" y="215" class="node-label">Recopilar identificación</text>
+  <text x="700" y="233" class="node-sublabel">• Número de cédula (si no está en sesión)</text>
+  <text x="700" y="247" class="node-sublabel">• Número de orden o fecha del examen pendiente</text>
+  <text x="700" y="262" class="node-sublabel" style="font-size:9px">Si es de provincia: agregar teléfonos y correo de filial</text>
+
+  <line x1="700" y1="270" x2="700" y2="305" class="connector" marker-end="url(#arrowF5)"/>
+
+  <rect x="500" y="305" width="400" height="80" rx="6" class="node-rect-escalate"/>
+  <text x="700" y="332" class="node-label" style="font-size:13px">ESCALAR A ASESOR</text>
+  <text x="700" y="350" class="node-sublabel">Contexto completo: cédula, orden, fecha</text>
+  <text x="700" y="365" class="node-sublabel">El asesor verifica saldo, gestiona el pago</text>
+  <text x="700" y="378" class="node-sublabel">y cierra el caso</text>
+
+  <!-- Nota fase 4 -->
+  <rect x="60" y="190" width="380" height="195" rx="6" fill="#FAEEDA" stroke="#FAC775"/>
+  <text x="250" y="220" class="node-label-dark" style="font-size:12px; fill:#7C4F0F">Implementación condicionada</text>
+  <text x="250" y="245" class="node-sublabel-dark" style="font-size:10px">Implementación: Fase 4</text>
+  <text x="250" y="262" class="node-sublabel-dark" style="font-size:10px">Después de que flujos F1, F2 y F4</text>
+  <text x="250" y="278" class="node-sublabel-dark" style="font-size:10px">estén estables en producción</text>
+  <text x="250" y="305" class="code-tag" style="fill:#BA7517">CITA LITERAL DEL DOCUMENTO</text>
+  <text x="250" y="335" class="node-sublabel-dark" style="font-size:10px">El agente NO procesa cobros directamente.</text>
+  <text x="250" y="350" class="node-sublabel-dark" style="font-size:10px">Solo recopila datos y escala al asesor</text>
+  <text x="250" y="365" class="node-sublabel-dark" style="font-size:10px">con todo el contexto de la sesión.</text>
+</svg>
+
+
+<!-- ─── F9 · TEST DINÁMICOS ─── -->
+<svg class="flow" viewBox="0 0 1400 720" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <marker id="arrowF9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5F5E5A"/>
+    </marker>
+  </defs>
+
+  <rect x="40" y="20" width="1320" height="50" rx="6" fill="#FAEEDA" stroke="#FAC775"/>
+  <text x="60" y="42" font-family="-apple-system, sans-serif" font-size="11" fill="#BA7517" font-weight="700">FLUJO 9</text>
+  <text x="60" y="60" font-family="-apple-system, sans-serif" font-size="14" fill="#7C4F0F" font-weight="700">Test Dinámicos · Estudios especializados con agendamiento</text>
+  <text x="950" y="50" font-family="-apple-system, sans-serif" font-size="10" fill="#BA7517" text-anchor="end">Solo particulares · Pago al final del examen</text>
+
+  <rect x="500" y="100" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="125" class="node-label">Usuario solicita test dinámico</text>
+  <text x="700" y="142" class="node-sublabel">"tienen disponible el test de glucagón?" · "test especiales?"</text>
+
+  <line x1="700" y1="155" x2="700" y2="190" class="connector" marker-end="url(#arrowF9)"/>
+
+  <polygon points="700,190 830,255 700,320 570,255" class="node-decision"/>
+  <text x="700" y="248" class="node-label-dark">Tipo de cliente</text>
+  <text x="700" y="266" class="node-label-dark"></text>
+
+  <!-- No aplica convenio -->
+  <line x1="830" y1="255" x2="1120" y2="255" class="connector"/>
+  <line x1="1120" y1="255" x2="1120" y2="345" class="connector" marker-end="url(#arrowF9)"/>
+  <text x="975" y="245" class="flow-label">CONVENIO · LAB</text>
+
+  <rect x="940" y="345" width="380" height="80" rx="6" class="node-rect-info"/>
+  <text x="1130" y="370" class="node-label-dark" style="font-size:11px">No aplica para convenios</text>
+  <text x="1130" y="388" class="node-sublabel-dark">Los test requieren control completo</text>
+  <text x="1130" y="402" class="node-sublabel-dark">del paciente y de los tiempos</text>
+  <text x="1130" y="416" class="node-sublabel-dark">de toma → solo cliente particular</text>
+
+  <!-- Particular -->
+  <line x1="700" y1="320" x2="700" y2="355" class="connector" marker-end="url(#arrowF9)"/>
+  <text x="715" y="340" class="flow-label">PARTICULAR</text>
+
+  <rect x="500" y="355" width="400" height="55" rx="6" class="node-rect-f4"/>
+  <text x="700" y="380" class="node-label">Identificar el test</text>
+  <text x="700" y="397" class="node-sublabel">Verificar en BD en qué sedes se puede realizar</text>
+
+  <line x1="700" y1="410" x2="700" y2="445" class="connector" marker-end="url(#arrowF9)"/>
+
+  <polygon points="700,445 830,500 700,555 570,500" class="node-decision"/>
+  <text x="700" y="498" class="node-label-dark">¿Sede elegida?</text>
+  <text x="700" y="513" class="node-sublabel-dark">GYE/UIO/CUE vs otras</text>
+
+  <!-- GYE/UIO/CUE -->
+  <line x1="570" y1="500" x2="280" y2="500" class="connector"/>
+  <line x1="280" y1="500" x2="280" y2="595" class="connector" marker-end="url(#arrowF9)"/>
+  <text x="425" y="490" class="flow-label">GYE / UIO / CUE</text>
+
+  <rect x="100" y="595" width="360" height="80" rx="6" class="node-rect-light"/>
+  <text x="280" y="620" class="node-label-dark" style="font-size:12px; fill:#0F6E56">Agendamiento automático</text>
+  <text x="280" y="638" class="node-sublabel-dark">Compartir indicaciones del test</text>
+  <text x="280" y="652" class="node-sublabel-dark">(preparación, duración, condiciones)</text>
+  <text x="280" y="667" class="code-tag" style="fill:#0F6E56">REQUIERE SISTEMA AUTOMATIZADO</text>
+
+  <!-- Otras provincias -->
+  <line x1="830" y1="500" x2="1120" y2="500" class="connector"/>
+  <line x1="1120" y1="500" x2="1120" y2="595" class="connector" marker-end="url(#arrowF9)"/>
+  <text x="975" y="490" class="flow-label">OTRA CIUDAD</text>
+
+  <rect x="940" y="595" width="380" height="105" rx="6" class="node-rect-escalate"/>
+  <text x="1130" y="620" class="node-label" style="font-size:12px">Recopilar + Escalar a asesor</text>
+  <text x="1130" y="638" class="node-sublabel">• Nombre del paciente · Acompañante</text>
+  <text x="1130" y="652" class="node-sublabel">  (obligatorio por protocolo)</text>
+  <text x="1130" y="666" class="node-sublabel">• Fecha + hora estimada · Teléfono</text>
+  <text x="1130" y="685" class="node-sublabel" style="font-size:9px">Pago se realiza el día del examen</text>
+
+  <!-- Pendiente Interlab -->
+  <rect x="500" y="595" width="400" height="105" rx="6" class="node-rect-pending"/>
+  <circle cx="525" cy="625" r="11" fill="#fff"/>
+  <text x="525" y="630" class="api-label" style="fill:#BA7517">!</text>
+  <text x="700" y="620" class="pending-label">PENDIENTE INTERLAB</text>
+  <text x="700" y="640" class="pending-label" style="font-size:9px">• Cargar listado de tests dinámicos disponibles</text>
+  <text x="700" y="655" class="pending-label" style="font-size:9px">• Indicar cuáles son exclusivos de Matriz</text>
+  <text x="700" y="670" class="pending-label" style="font-size:9px">• Confirmar sistema de agendamiento</text>
+  <text x="700" y="685" class="pending-label" style="font-size:9px">  automático para GYE/UIO/CUE</text>
+</svg>
+
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<div class="footer-bar">
+  <strong>InterNOVA · Plan de Implementación · Los 15 flujos completos</strong><br>
+  Arquitectura WDB sobre el flujograma de procesos definido por INTERLAB S.A. · Powered by Jelou<br>
+  Confidencial · Uso exclusivo INTERLAB S.A. · Mayo 2026 · Versión 2.0
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
